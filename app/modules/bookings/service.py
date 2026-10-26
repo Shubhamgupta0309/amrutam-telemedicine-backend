@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import DBAPIError, IntegrityError, OperationalError
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.exceptions import (
@@ -164,7 +164,7 @@ def book_appointment_atomic(
         db.commit()
         return response_body, 201
 
-    except IntegrityError as ie:
+    except (IntegrityError, OperationalError) as ce:
         if db.is_active:
             try:
                 db.rollback()
@@ -173,7 +173,7 @@ def book_appointment_atomic(
         raise ConflictException(
             detail="This appointment slot is no longer available. It was reserved concurrently.",
             error_code="SLOT_ALREADY_RESERVED",
-        ) from ie
+        ) from ce
     except AppException:
         if db.is_active:
             try:
