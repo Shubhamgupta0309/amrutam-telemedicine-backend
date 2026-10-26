@@ -1,0 +1,43 @@
+sequenceDiagram
+    autonumber
+    actor Patient
+    participant FastAPI as FastAPI Backend
+    participant DB as PostgreSQL Database
+    participant Worker as Background Outbox Worker
+
+    Patient->>FastAPI: POST /api/v1/bookings + Idempotency-Key
+    Note over FastAPI: Authenticate JWT, Authorize Patient Role,<br/>Validate Request Schema & Hash Payload
+
+    FastAPI->>DB: Check idempotency_records (scope='bookings:create', key=Idempotency-Key)
+    alt Idempotency Record Exists
+        alt Payload Hash Matches
+            DB-->>FastAPI: Return Cached Result
+            FastAPI-->>Patient: 201 Created (Original Idempotent Response)
+        else Payload Hash Mismatched
+            FastAPI-->>Patient: 409 Conflict (IDEMPOTENCY_PAYLOAD_MISMATCH)
+        end
+    else New Request Key
+        FastAPI->>DB: BEGIN TRANSACTION (SERIALIZABLE / SELECT FOR UPDATE)
+        FastAPI->>DB: SELECT * FROM availability_slots WHERE id = :slot_id FOR UPDATE
+        
+        alt Slot Available and Doctor Verified
+            DB-->>FastAPI: Slot Locked (status='AVAILABLE')
+            FastAPI->>DB: UPDATE availability_slots SET status='BOOKED' WHERE id = :slot_id
+            FastAPI->>DB: INSERT INTO consultations (id, patient_id, doctor_id, slot_id, status='SCHEDULED')
+            FastAPI->>DB: INSERT INTO idempotency_records (key, scope, request_hash, status_code=201, response_body)
+            FastAPI->>DB: INSERT INTO outbox_events (event_type='BOOKING_CONFIRMED', payload)
+            FastAPI->>DB: INSERT INTO audit_logs (action='BOOKING_CREATED', actor_id=patient_id)
+            FastAPI->>DB: COMMIT TRANSACTION
+            FastAPI-->>Patient: 201 Created { consultation_id, status: "SCHEDULED", slot }
+
+            critical Async Event Processing
+                Worker->>DB: Poll PENDING events FROM outbox_events
+                Worker->>Worker: Dispatch SMS/Email Confirmation
+                Worker->>DB: UPDATE outbox_events SET status='PROCESSED'
+            end
+        else Slot Unavailable or Already Booked
+            DB-->>FastAPI: Slot Locked (status != 'AVAILABLE')
+            FastAPI->>DB: ROLLBACK TRANSACTION
+            FastAPI-->>Patient: 409 Conflict (SLOT_ALREADY_RESERVED)
+        end
+    end

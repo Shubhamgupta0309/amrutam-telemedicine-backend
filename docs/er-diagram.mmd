@@ -1,0 +1,130 @@
+erDiagram
+    users ||--o| profiles : "has profile"
+    users ||--o| doctors : "has doctor credentials"
+    users ||--o{ consultations : "books as patient"
+    users ||--o{ prescriptions : "receives as patient"
+    users ||--o{ audit_logs : "acts as"
+
+    doctors ||--o{ availability_slots : "schedules slots"
+    doctors ||--o{ consultations : "attends as doctor"
+    doctors ||--o{ prescriptions : "issues as doctor"
+
+    availability_slots ||--o| consultations : "reserves slot"
+    consultations ||--o| prescriptions : "results in prescription"
+    consultations ||--o{ payments : "billed via payment"
+
+    users {
+        string id PK "UUID"
+        string email UK "Normalized unique email"
+        string password_hash "Argon2id/Bcrypt"
+        string role "patient | doctor | admin"
+        string status "active | suspended | pending"
+        boolean mfa_enabled "MFA status"
+        string mfa_secret "TOTP Base32 secret"
+        datetime created_at
+        datetime updated_at
+    }
+
+    profiles {
+        string id PK "UUID"
+        string user_id FK, UK "References users.id"
+        string name "Full Name"
+        string phone "Contact Number"
+        string timezone "User Timezone"
+        datetime created_at
+        datetime updated_at
+    }
+
+    doctors {
+        string id PK "UUID"
+        string user_id FK, UK "References users.id"
+        string specialty "Ayurveda | Dermatology | etc"
+        string registration_number UK "Medical Board Registration"
+        string verification_status "PENDING | VERIFIED | REJECTED"
+        float consultation_fee "Fee in INR"
+        text bio "Professional Bio"
+        datetime created_at
+        datetime updated_at
+    }
+
+    availability_slots {
+        string id PK "UUID"
+        string doctor_id FK "References doctors.id"
+        datetime start_at "Slot start time"
+        datetime end_at "Slot end time > start_at"
+        string status "AVAILABLE | RESERVED | BOOKED | CANCELLED"
+        datetime created_at
+        datetime updated_at
+    }
+
+    consultations {
+        string id PK "UUID"
+        string patient_id FK "References users.id"
+        string doctor_id FK "References doctors.id"
+        string slot_id FK, UK "References availability_slots.id (1:1)"
+        string status "SCHEDULED | IN_PROGRESS | COMPLETED | CANCELLED"
+        string idempotency_key "Unique transaction key"
+        text notes "Chief complaints"
+        datetime created_at
+        datetime updated_at
+    }
+
+    prescriptions {
+        string id PK "UUID"
+        string consultation_id FK, UK "References consultations.id"
+        string doctor_id FK "References doctors.id"
+        string patient_id FK "References users.id"
+        text diagnosis "Clinical diagnosis"
+        text medications "JSON: drug, dosage, frequency, duration"
+        text instructions "Lifestyle and intake directions"
+        datetime created_at
+        datetime updated_at
+    }
+
+    payments {
+        string id PK "UUID"
+        string consultation_id FK "References consultations.id"
+        float amount "Transaction amount"
+        string currency "INR"
+        string status "PENDING | SUCCESS | FAILED | REFUNDED"
+        string provider "mock_pay"
+        string provider_reference UK "Provider event ID for deduplication"
+        string idempotency_key "Payment idempotency key"
+        datetime created_at
+        datetime updated_at
+    }
+
+    audit_logs {
+        string id PK "UUID"
+        string actor_id "User UUID or system"
+        string action "Action identifier"
+        string resource_type "Entity name"
+        string resource_id "Target ID"
+        string request_id "Correlation ID"
+        string ip_address "Client IP"
+        text details "Sanitized JSON (no secrets)"
+        datetime created_at
+    }
+
+    idempotency_records {
+        string id PK "UUID"
+        string scope "API scope (e.g. bookings:create)"
+        string key "Client provided Idempotency-Key"
+        string request_hash "SHA256 of request body"
+        int status_code "HTTP response status"
+        text response_body "Cached JSON payload"
+        datetime created_at
+        datetime expires_at
+    }
+
+    outbox_events {
+        string id PK "UUID"
+        string event_type "BOOKING_CONFIRMED | PRESCRIPTION_ISSUED"
+        text payload "JSON event data"
+        string status "PENDING | PROCESSED | FAILED"
+        int retry_count "Execution attempt count"
+        int max_retries "Max retry threshold"
+        text last_error "Error message if failed"
+        datetime created_at
+        datetime processed_at
+    }
