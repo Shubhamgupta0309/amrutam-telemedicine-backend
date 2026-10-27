@@ -10,20 +10,19 @@ A production-grade, high-reliability telemedicine backend built for **Amrutam**.
 
 ---
 
-## 📑 Deliverables Index
+## 📑 System Documentation & Architecture
 
-| Deliverable | Location | Description |
+| Component / Document | Path | Description |
 |---|---|---|
 | **Codebase & Infra** | [`app/`](./app), [`compose.yaml`](./compose.yaml), [`Dockerfile`](./Dockerfile) | Full application, background workers, and container definitions |
 | **OpenAPI Schema** | [`openapi.json`](./openapi.json) | Exported OpenAPI 3.1 contract (23 versioned endpoints) |
-| **Architecture Document** | [`docs/architecture.md`](./docs/architecture.md) | 2–4 page architecture, scaling decisions, and trade-offs |
+| **Architecture Document** | [`docs/architecture.md`](./docs/architecture.md) | Deep-dive system architecture, domain boundaries, scaling strategies, and trade-offs |
 | **Booking Sequence Diagram**| [`docs/booking-sequence.mmd`](./docs/booking-sequence.mmd) | Concurrency boundaries, locking, and duplicate handling |
 | **Entity-Relationship Diagram**| [`docs/er-diagram.mmd`](./docs/er-diagram.mmd) | Database entities, foreign keys, and constraint rules |
-| **Threat Model & Security** | [`docs/threat-model.md`](./docs/threat-model.md) | STRIDE analysis, attack surface, and Indian healthcare compliance |
+| **Threat Model & Security** | [`docs/threat-model.md`](./docs/threat-model.md) | STRIDE analysis, attack surface, and healthcare data compliance |
 | **Security Checklist** | [`docs/security-checklist.md`](./docs/security-checklist.md) | Pre-deployment verification across authentication, RBAC, and logs |
 | **Disaster Recovery Plan** | [`docs/disaster-recovery.md`](./docs/disaster-recovery.md) | RPO (<5m), RTO (<30m), WAL archiving, and restoration steps |
 | **Load Test Report** | [`docs/load-test-report.md`](./docs/load-test-report.md) | Traffic modeling for 100k daily consultations and p95 benchmarks |
-| **Five-Minute Demo Script** | [`docs/demo-script.md`](./docs/demo-script.md) | Minute-by-minute evaluation walkthrough and presentation guide |
 | **CI/CD Pipeline** | [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) | Automated linting, PostgreSQL service test runs, and schema checks |
 
 ---
