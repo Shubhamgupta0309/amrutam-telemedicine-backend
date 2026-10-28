@@ -23,6 +23,7 @@ A production-grade, high-reliability telemedicine backend built for **Amrutam**.
 | **Security Checklist** | [`docs/security-checklist.md`](./docs/security-checklist.md) | Pre-deployment verification across authentication, RBAC, and logs |
 | **Disaster Recovery Plan** | [`docs/disaster-recovery.md`](./docs/disaster-recovery.md) | RPO (<5m), RTO (<30m), WAL archiving, and restoration steps |
 | **Load Test Report** | [`docs/load-test-report.md`](./docs/load-test-report.md) | Traffic modeling for 100k daily consultations and p95 benchmarks |
+| **Demo Walkthrough Video** | [`assets/demo-video.mp4`](./assets/demo-video.mp4) | 5-minute technical demonstration walkthrough |
 | **CI/CD Pipeline** | [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) | Automated linting, PostgreSQL service test runs, and schema checks |
 
 ---
