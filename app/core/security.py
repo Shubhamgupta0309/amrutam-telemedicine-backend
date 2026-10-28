@@ -4,7 +4,7 @@ import pyotp
 import jwt
 from passlib.context import CryptContext
 from fastapi import Depends, Header
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -15,9 +15,8 @@ pwd_context = CryptContext(
     deprecated="auto"
 )
 
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/auth/login"
-)
+http_bearer = HTTPBearer(auto_error=True)
+oauth2_scheme = http_bearer  # Backwards compatibility
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:

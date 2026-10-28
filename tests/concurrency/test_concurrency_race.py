@@ -34,16 +34,17 @@ def test_concurrent_booking_attempts_prevent_double_booking(client: TestClient, 
     results = []
 
     def book_slot(token: str, patient_name: str):
-        resp = client.post(
-            "/api/v1/bookings",
-            headers={"Authorization": f"Bearer {token}"},
-            json={
-                "doctor_id": doctor_profile.id,
-                "slot_id": slot.id,
-                "notes": f"Booked by {patient_name}"
-            }
-        )
-        return resp.status_code, resp.json()
+        with TestClient(client.app) as local_client:
+            resp = local_client.post(
+                "/api/v1/bookings",
+                headers={"Authorization": f"Bearer {token}"},
+                json={
+                    "doctor_id": doctor_profile.id,
+                    "slot_id": slot.id,
+                    "notes": f"Booked by {patient_name}"
+                }
+            )
+            return resp.status_code, resp.json()
 
     # Dispatch both requests concurrently in parallel threads
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:

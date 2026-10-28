@@ -1,4 +1,4 @@
-from typing import List, Callable
+from typing import Any, List, Callable
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import select
@@ -11,9 +11,10 @@ from app.modules.doctors.models import Doctor
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    auth_credentials: Any = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ) -> User:
+    token = auth_credentials.credentials if hasattr(auth_credentials, "credentials") else str(auth_credentials)
     payload = decode_token(token)
     if payload.get("type") != "access":
         raise UnauthorizedException(detail="Invalid token type")
