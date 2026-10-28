@@ -8,6 +8,8 @@
 
 A production-grade, high-reliability telemedicine backend built for **Amrutam**. Designed as a domain-driven modular monolith to comfortably sustain **100,000 daily consultations** with sub-80ms p95 latencies, database-enforced double-booking prevention, distributed idempotency, clinical lifecycle controls, role-based access control (RBAC), and observability.
 
+> 📹 **Demonstration Video**: A 5-minute complete architectural walkthrough and live API demonstration is included directly in the repository root: [**`demo-video.mp4`**](./demo-video.mp4).
+
 ---
 
 ## 📑 System Documentation & Architecture
@@ -23,7 +25,7 @@ A production-grade, high-reliability telemedicine backend built for **Amrutam**.
 | **Security Checklist** | [`docs/security-checklist.md`](./docs/security-checklist.md) | Pre-deployment verification across authentication, RBAC, and logs |
 | **Disaster Recovery Plan** | [`docs/disaster-recovery.md`](./docs/disaster-recovery.md) | RPO (<5m), RTO (<30m), WAL archiving, and restoration steps |
 | **Load Test Report** | [`docs/load-test-report.md`](./docs/load-test-report.md) | Traffic modeling for 100k daily consultations and p95 benchmarks |
-| **Demo Walkthrough Video** | [`assets/demo-video.mp4`](./assets/demo-video.mp4) | 5-minute technical demonstration walkthrough |
+| **Demo Walkthrough Video** | [`demo-video.mp4`](./demo-video.mp4) | 5-minute technical demonstration walkthrough |
 | **CI/CD Pipeline** | [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) | Automated linting, PostgreSQL service test runs, and schema checks |
 
 ---
